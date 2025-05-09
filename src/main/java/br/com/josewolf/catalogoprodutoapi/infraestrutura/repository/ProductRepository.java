@@ -1,2 +1,9 @@
-package br.com.josewolf.catalogoprodutoapi.infraestrutura.repository;public interface ProductRepository {
+package br.com.josewolf.catalogoprodutoapi.infraestrutura.repository;
+
+import br.com.josewolf.catalogoprodutoapi.infraestrutura.entity.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ProductRepository extends JpaRepository<Product,Long> {
 }
