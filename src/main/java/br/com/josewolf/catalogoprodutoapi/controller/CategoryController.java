@@ -1,7 +1,10 @@
 package br.com.josewolf.catalogoprodutoapi.controller;
 
 import br.com.josewolf.catalogoprodutoapi.business.CategoryService;
+import br.com.josewolf.catalogoprodutoapi.business.dto.request.CategoryRequestDTO;
+import br.com.josewolf.catalogoprodutoapi.business.dto.response.CategoryResponseDTO;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.entity.Category;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,29 +21,29 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<Category> createCategpry(@RequestBody Category category){
-        Category createCategory = categoryService.createCategory(category);
-        return new ResponseEntity<>(createCategory, HttpStatus.CREATED);
+    public ResponseEntity<CategoryResponseDTO> createCategpry(@Valid @RequestBody CategoryRequestDTO categoryRequestDTO){
+        CategoryResponseDTO createCategoryDTO = categoryService.createCategory(categoryRequestDTO);
+        return new ResponseEntity<>(createCategoryDTO, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories(){
-        List<Category> categories = categoryService.getAllCategories();
+    public ResponseEntity<List<CategoryResponseDTO>> getAllCategories(){
+        List<CategoryResponseDTO> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id){
-        Optional<Category> categoryOptional = categoryService.getCategoryById(id);
+    public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable Long id){
+        Optional<CategoryResponseDTO> categoryOptional = categoryService.getCategoryById(id);
         return categoryOptional
-                .map(category -> ResponseEntity.ok(category))
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category categoryDetails){
+    public ResponseEntity<CategoryResponseDTO> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequestDTO categoryDetails){
         try {
-            Category updateCategory = categoryService.updateCategory(id, categoryDetails);
+            CategoryResponseDTO updateCategory = categoryService.updateCategory(id, categoryDetails);
             return ResponseEntity.ok(updateCategory);
         }catch (RuntimeException e){
             return ResponseEntity.notFound().build();

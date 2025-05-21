@@ -1,5 +1,8 @@
 package br.com.josewolf.catalogoprodutoapi.business;
 
+import br.com.josewolf.catalogoprodutoapi.business.converter.ProductConverter;
+import br.com.josewolf.catalogoprodutoapi.business.dto.request.ProductRequestDTO;
+import br.com.josewolf.catalogoprodutoapi.business.dto.response.ProductResponseDTO;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.entity.Category;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.entity.Product;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.repository.CategoryRepository;
@@ -17,52 +20,53 @@ public class ProductServiceImp implements ProductService{
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductConverter productConverter;
 
     @Override
     @Transactional
-    public Product createProduct(Product product) {
-        if(product.getCategory() == null || product.getCategory().getId() == null){
-            throw new IllegalArgumentException("A categoria do produto não pode ser nula e deve ter um ID.");
-        }
-        Category managedCategory = categoryRepository.findById(product.getCategory().getId())
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada com o ID: " + product.getCategory().getId()));
+    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
+        Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada com o ID: " + productRequestDTO.getCategoryId()));
 
-        product.setCategory(managedCategory);
-        return productRepository.save(product);
+        Product productEntity = productConverter.toEntity(productRequestDTO, category);
+        Product savedProduct = productRepository.save(productEntity);
+        return productConverter.toResponseDTO(savedProduct);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<ProductResponseDTO> getAllProducts() {
+        List<Product> products = productRepository.findAll();
+        return productConverter.toResponseDTOList(products);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Product> getProductById(Long id) {
-        return productRepository.findById(id);
+    public Optional<ProductResponseDTO> getProductById(Long id) {
+        return productRepository.findById(id)
+                .map(productConverter::toResponseDTO);
     }
 
     @Override
     @Transactional
-    public Product updateProduct(Long id, Product productDetails) {
-        Product product = productRepository.findById(id).orElseThrow(
-                ()-> new RuntimeException("Produto não encontrado por id: " + id));
-        product.setName(productDetails.getName());
-        product.setPrice(productDetails.getPrice());
-        product.setDescription(productDetails.getDescription());
-        product.setStockQuantity(productDetails.getStockQuantity());
+    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("Produto não encontrado por id: " + id));
 
-        if(productDetails.getCategory() != null && productDetails.getCategory().getId() != null){
-            Long newCategoryId = productDetails.getCategory().getId();
+        Category categoryToAssociate = product.getCategory();
 
-            if(product.getCategory() == null || !product.getCategory().getId().equals(newCategoryId)){
-                Category managedCategory = categoryRepository.findById(newCategoryId)
-                        .orElseThrow(() -> new RuntimeException("Categoria para atualização não encontrada com o ID: " + newCategoryId));
+        if(productRequestDTO.getCategoryId() != null){
+            if(product.getCategory() == null || !product.getCategory().getId().equals(productRequestDTO.getCategoryId())){
+                Category managedCategory = categoryRepository.findById(productRequestDTO.getCategoryId())
+                        .orElseThrow(() -> new RuntimeException("Categoria para atualização não encontrada com o ID: " + productRequestDTO.getCategoryId()));
                 product.setCategory(managedCategory);
             }
         }
-        return productRepository.save(product);
+
+        productConverter.updateEntityFromRequestDTO(productRequestDTO,product, categoryToAssociate);
+        Product updateProduct = productRepository.save(product);
+
+        return productConverter.toResponseDTO(updateProduct);
     }
 
     @Override
