@@ -60,16 +60,5 @@ public class CategoryController {
         }
     }
 }
-//@PostMapping
-//public ResponseEntity<Category> createCategory(@RequestBody Category category) {
-//    // @RequestBody: Diz ao Spring para converter o corpo da requisição JSON em um objeto Category.
-//    // Validações podem ser adicionadas aqui ou no DTO/Entidade.
-//
-//    Category createdCategory = categoryService.createCategory(category);
-//
-//    // Retorna a categoria criada e o status HTTP 201 (Created).
-//    // O URI do recurso criado também pode ser retornado no header "Location",
-//    // mas vamos manter simples por enquanto.
-//    return new ResponseEntity<>(createdCategory, HttpStatus.CREATED);
-//}
+
 
