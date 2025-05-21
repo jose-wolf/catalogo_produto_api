@@ -1,7 +1,9 @@
 package br.com.josewolf.catalogoprodutoapi.controller;
 
 import br.com.josewolf.catalogoprodutoapi.business.ProductService;
-import br.com.josewolf.catalogoprodutoapi.infraestrutura.entity.Product;
+import br.com.josewolf.catalogoprodutoapi.business.dto.request.ProductRequestDTO;
+import br.com.josewolf.catalogoprodutoapi.business.dto.response.ProductResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,29 +20,29 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product){
-        Product createProduct = productService.createProduct(product);
-        return new ResponseEntity<>(createProduct, HttpStatus.CREATED);
+    public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductRequestDTO productRequestDTO){
+        ProductResponseDTO createProductDTO = productService.createProduct(productRequestDTO);
+        return new ResponseEntity<>(createProductDTO, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProduct(){
-        List<Product> productList = productService.getAllProducts();
+    public ResponseEntity<List<ProductResponseDTO>> getAllProducts(){
+        List<ProductResponseDTO> productList = productService.getAllProducts();
         return ResponseEntity.ok(productList);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductByID(@PathVariable Long id){
-        Optional<Product> productOptional = productService.getProductById(id);
+    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id){
+        Optional<ProductResponseDTO> productOptional = productService.getProductById(id);
         return productOptional
                 .map(product -> ResponseEntity.ok(product))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id,@RequestBody Product product){
+    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id,@Valid @RequestBody ProductRequestDTO productRequestDTO){
         try {
-            Product updateProduct = productService.updateProduct(id,product);
+            ProductResponseDTO updateProduct = productService.updateProduct(id,productRequestDTO);
             return ResponseEntity.ok(updateProduct);
         }catch (RuntimeException e){
             return ResponseEntity.notFound().build();
