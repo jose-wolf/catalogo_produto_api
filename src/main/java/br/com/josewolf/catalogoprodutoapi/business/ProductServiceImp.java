@@ -5,6 +5,7 @@ import br.com.josewolf.catalogoprodutoapi.business.dto.request.ProductRequestDTO
 import br.com.josewolf.catalogoprodutoapi.business.dto.response.ProductResponseDTO;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.entity.Category;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.entity.Product;
+import br.com.josewolf.catalogoprodutoapi.infraestrutura.exceptions.ResourceNotFoundException;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.repository.CategoryRepository;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class ProductServiceImp implements ProductService{
     @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
         Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada com o ID: " + productRequestDTO.getCategoryId()));
+                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + productRequestDTO.getCategoryId()));
 
         Product productEntity = productConverter.toEntity(productRequestDTO, category);
         Product savedProduct = productRepository.save(productEntity);
@@ -51,14 +52,14 @@ public class ProductServiceImp implements ProductService{
     @Transactional
     public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) {
         Product product = productRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Produto não encontrado por id: " + id));
+                .orElseThrow(()-> new ResourceNotFoundException("Produto não encontrado por id: " + id));
 
         Category categoryToAssociate = product.getCategory();
 
         if(productRequestDTO.getCategoryId() != null){
             if(product.getCategory() == null || !product.getCategory().getId().equals(productRequestDTO.getCategoryId())){
                 Category managedCategory = categoryRepository.findById(productRequestDTO.getCategoryId())
-                        .orElseThrow(() -> new RuntimeException("Categoria para atualização não encontrada com o ID: " + productRequestDTO.getCategoryId()));
+                        .orElseThrow(() -> new ResourceNotFoundException("Categoria para atualização não encontrada com o ID: " + productRequestDTO.getCategoryId()));
                 product.setCategory(managedCategory);
             }
         }
@@ -73,7 +74,7 @@ public class ProductServiceImp implements ProductService{
     @Transactional
     public void deleteProduct(Long id) {
         if(!productRepository.existsById(id)) {
-            throw new RuntimeException("Produto não encontrado pelo ID: " + id);
+            throw new ResourceNotFoundException("Produto não encontrado pelo ID: " + id);
         }
         productRepository.deleteById(id);
     }
