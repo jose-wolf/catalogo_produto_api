@@ -28,6 +28,7 @@ public class ProductRequestDTO {
     @Min(value = 1, message = "A quantidade em estoque não pode ser negativa")
     private Integer stockQuantity;
 
+    @NotNull(message = "O ID da categoria é obrigatório e não pode ser nulo.")
     private Long categoryId;
 
 }

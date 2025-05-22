@@ -4,6 +4,7 @@ import br.com.josewolf.catalogoprodutoapi.business.converter.CategoryConverter;
 import br.com.josewolf.catalogoprodutoapi.business.dto.request.CategoryRequestDTO;
 import br.com.josewolf.catalogoprodutoapi.business.dto.response.CategoryResponseDTO;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.entity.Category;
+import br.com.josewolf.catalogoprodutoapi.infraestrutura.exceptions.ResourceNotFoundException;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,7 @@ public class CategoryServiceImp implements CategoryService{
     @Transactional
     public CategoryResponseDTO updateCategory(Long id, CategoryRequestDTO categoryRequestDTO) {
         Category category = categoryRepository.findById(id).orElseThrow(
-                ()-> new RuntimeException("Categoria não encontrada com o id: " + id));
+                ()-> new ResourceNotFoundException("Categoria não encontrada com o id: " + id));
 
         categoryConverter.updateCategory(categoryRequestDTO, category);
         Category updateCategory = categoryRepository.save(category);
@@ -61,7 +62,7 @@ public class CategoryServiceImp implements CategoryService{
     @Transactional
     public void deleteCategory(Long id) {
         if(!categoryRepository.existsById(id)){
-            throw new RuntimeException("Categoria não encontrada com o ID: " + id);
+            throw new ResourceNotFoundException("Categoria não encontrada com o ID: " + id);
         }
         categoryRepository.deleteById(id);
     }
