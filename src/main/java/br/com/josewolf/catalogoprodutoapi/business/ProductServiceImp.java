@@ -1,6 +1,7 @@
 package br.com.josewolf.catalogoprodutoapi.business;
 
 import br.com.josewolf.catalogoprodutoapi.business.converter.ProductConverter;
+import br.com.josewolf.catalogoprodutoapi.business.dto.request.ProductPatchRequestDTO;
 import br.com.josewolf.catalogoprodutoapi.business.dto.request.ProductRequestDTO;
 import br.com.josewolf.catalogoprodutoapi.business.dto.response.ProductResponseDTO;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.entity.Category;
@@ -27,7 +28,7 @@ public class ProductServiceImp implements ProductService{
     @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
         Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada com o ID: " + productRequestDTO.getCategoryId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada com o ID: " + productRequestDTO.getCategoryId()));
 
         Product productEntity = productConverter.toEntity(productRequestDTO, category);
         Product savedProduct = productRepository.save(productEntity);
@@ -59,7 +60,8 @@ public class ProductServiceImp implements ProductService{
         if(productRequestDTO.getCategoryId() != null){
             if(product.getCategory() == null || !product.getCategory().getId().equals(productRequestDTO.getCategoryId())){
                 Category managedCategory = categoryRepository.findById(productRequestDTO.getCategoryId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Categoria para atualização não encontrada com o ID: " + productRequestDTO.getCategoryId()));
+                        .orElseThrow(() -> new ResourceNotFoundException("Categoria para atualização não encontrada com o ID: "
+                                + productRequestDTO.getCategoryId()));
                 product.setCategory(managedCategory);
             }
         }
@@ -68,6 +70,28 @@ public class ProductServiceImp implements ProductService{
         Product updateProduct = productRepository.save(product);
 
         return productConverter.toResponseDTO(updateProduct);
+    }
+
+    @Override
+    public ProductResponseDTO patchProduct(Long id, ProductPatchRequestDTO patchDTO) {
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado com o ID: " + id));
+
+        Category categoryQueSeraAssociada = existingProduct.getCategory();
+
+        if (patchDTO.getCategoryId() != null) {
+
+            if (existingProduct.getCategory() == null || !existingProduct.getCategory().getId().equals(patchDTO.getCategoryId())) {
+                categoryQueSeraAssociada = categoryRepository.findById(patchDTO.getCategoryId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Categoria (nova) para atualização não encontrada com o ID: " + patchDTO.getCategoryId()));
+            }
+        }
+
+        productConverter.patchEntityFromDTO(patchDTO, existingProduct, categoryQueSeraAssociada);
+
+        Product updatedProduct = productRepository.save(existingProduct);
+
+        return productConverter.toResponseDTO(updatedProduct);
     }
 
     @Override

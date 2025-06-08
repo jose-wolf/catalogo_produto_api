@@ -20,6 +20,10 @@ public class CategoryConverter {
     }
 
     public Category toCategoryEntity(CategoryRequestDTO categoryRequestDTO){
+        if (categoryRequestDTO == null){
+            throw  new IllegalArgumentException("Argumentos inválidos");
+        }
+
         return Category.builder()
                 .name(categoryRequestDTO.getName())
                 .build();

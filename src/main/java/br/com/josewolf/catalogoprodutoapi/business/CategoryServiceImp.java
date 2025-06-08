@@ -28,10 +28,6 @@ public class CategoryServiceImp implements CategoryService{
         return categoryConverter.toCategory(savedCategory);
     }
 
-    private CategoryResponseDTO toCategoryResponseDto(Category category) {
-        return new CategoryResponseDTO(category.getId(), category.getName());
-    }
-
     @Override
     @Transactional(readOnly = true)
     public List<CategoryResponseDTO> getAllCategories() {

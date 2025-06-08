@@ -1,5 +1,6 @@
 package br.com.josewolf.catalogoprodutoapi.business.converter;
 
+import br.com.josewolf.catalogoprodutoapi.business.dto.request.ProductPatchRequestDTO;
 import br.com.josewolf.catalogoprodutoapi.business.dto.request.ProductRequestDTO;
 import br.com.josewolf.catalogoprodutoapi.business.dto.response.ProductResponseDTO;
 import br.com.josewolf.catalogoprodutoapi.infraestrutura.entity.Category;
@@ -40,7 +41,7 @@ public class ProductConverter {
                 .description(productRequestDTO.getDescription())
                 .price(productRequestDTO.getPrice())
                 .stockQuantity(productRequestDTO.getStockQuantity())
-                .category(category) // Associa a categoria que o serviço já buscou
+                .category(category)
                 .build();
     }
 
@@ -68,6 +69,30 @@ public class ProductConverter {
 
         if (category != null && (entityToUpdate.getCategory() == null || !entityToUpdate.getCategory().getId().equals(category.getId()))) {
             entityToUpdate.setCategory(category);
+        }
+    }
+
+    public void patchEntityFromDTO(ProductPatchRequestDTO patchDTO, Product entityToUpdate, Category categoryIfChanged) {
+        if (patchDTO == null || entityToUpdate == null) {
+            return;
+        }
+        if (patchDTO.getName() != null) {
+            entityToUpdate.setName(patchDTO.getName());
+        }
+        if (patchDTO.getDescription() != null) {
+            entityToUpdate.setDescription(patchDTO.getDescription());
+        }
+        if (patchDTO.getPrice() != null) {
+            entityToUpdate.setPrice(patchDTO.getPrice());
+        }
+        if (patchDTO.getStockQuantity() != null) {
+            entityToUpdate.setStockQuantity(patchDTO.getStockQuantity());
+        }
+
+        if (categoryIfChanged != null) {
+            if (entityToUpdate.getCategory() == null || !entityToUpdate.getCategory().getId().equals(categoryIfChanged.getId())) {
+                entityToUpdate.setCategory(categoryIfChanged);
+            }
         }
     }
 }

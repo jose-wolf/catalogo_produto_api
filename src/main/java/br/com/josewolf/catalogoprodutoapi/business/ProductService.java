@@ -1,5 +1,6 @@
 package br.com.josewolf.catalogoprodutoapi.business;
 
+import br.com.josewolf.catalogoprodutoapi.business.dto.request.ProductPatchRequestDTO;
 import br.com.josewolf.catalogoprodutoapi.business.dto.request.ProductRequestDTO;
 import br.com.josewolf.catalogoprodutoapi.business.dto.response.ProductResponseDTO;
 
@@ -12,6 +13,7 @@ public interface ProductService {
     List<ProductResponseDTO> getAllProducts();
     Optional<ProductResponseDTO> getProductById(Long id);
     ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO);
+    ProductResponseDTO patchProduct(Long id, ProductPatchRequestDTO productPatchDetails);
     void deleteProduct(Long id);
 
 }

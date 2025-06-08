@@ -2,14 +2,15 @@ package br.com.josewolf.catalogoprodutoapi.infraestrutura.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+        import lombok.*;
 
-import java.util.List;
+        import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @Entity
 @Table(name = "categories")
 @Builder
